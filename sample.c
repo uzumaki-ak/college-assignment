@@ -1,0 +1,1 @@
+int skyline(){int naruto=10; float supra=3.14; if(naruto>5) naruto=naruto+1; return 0;}
