@@ -1,0 +1,146 @@
+=========================================================
+JAVA PRACTICALS - QUICK RUN STEPS (SHORT + WORKING)
+=========================================================
+
+1) DATABASE (run once in psql)
+---------------------------------------------------------
+CREATE DATABASE practicaldb;
+\c practicaldb
+
+CREATE TABLE IF NOT EXISTS student (
+  id SERIAL PRIMARY KEY,
+  roll_no INT,
+  name VARCHAR(100),
+  branch VARCHAR(50)
+);
+
+CREATE TABLE IF NOT EXISTS feedback (
+  id SERIAL PRIMARY KEY,
+  visitor_name VARCHAR(100),
+  email VARCHAR(100),
+  message TEXT,
+  rating INT,
+  submitted_at TIMESTAMP
+);
+
+2) JARS NEEDED
+---------------------------------------------------------
+- PostgreSQL JDBC jar: C:\jars\postgresql.jar
+- Tomcat 9 already installed (apache-tomcat-9.0.111)
+- For Hibernate (exp8, exp9): keep all hibernate jars in C:\jars\hib\*
+- For Struts2 (exp6, exp7): keep Struts 2.5.x jars in C:\jars\struts\*
+
+3) EXP 1 (JDBC CONNECTION)
+---------------------------------------------------------
+cd exp1_jdbc
+javac -cp .;C:\jars\postgresql.jar JdbcConnection.java
+java  -cp .;C:\jars\postgresql.jar JdbcConnection
+
+4) EXP 2, 3 (JSP)
+---------------------------------------------------------
+Copy exp2_jsp_basic\index.jsp to:
+apache-tomcat-9.0.111\webapps\exp2\
+
+Copy exp3_jsp_insert\form.jsp and insert.jsp to:
+apache-tomcat-9.0.111\webapps\exp3\
+
+Put postgresql.jar in:
+apache-tomcat-9.0.111\lib\
+
+Start Tomcat:
+apache-tomcat-9.0.111\bin\startup.bat
+
+Open:
+http://localhost:8080/exp2/index.jsp
+http://localhost:8080/exp3/form.jsp
+
+5) EXP 4 (SERVLET VALIDATION)
+---------------------------------------------------------
+mkdir apache-tomcat-9.0.111\webapps\exp4\WEB-INF\classes
+copy exp4_servlet_validation\index.html apache-tomcat-9.0.111\webapps\exp4\
+
+javac -cp .;apache-tomcat-9.0.111\lib\servlet-api.jar -d apache-tomcat-9.0.111\webapps\exp4\WEB-INF\classes exp4_servlet_validation\UserValidationServlet.java
+
+Open:
+http://localhost:8080/exp4/index.html
+
+6) EXP 5 (CALL ONE SERVLET BY ANOTHER)
+---------------------------------------------------------
+mkdir apache-tomcat-9.0.111\webapps\exp5\WEB-INF\classes
+copy exp5_servlet_call\index.html apache-tomcat-9.0.111\webapps\exp5\
+
+javac -cp .;apache-tomcat-9.0.111\lib\servlet-api.jar -d apache-tomcat-9.0.111\webapps\exp5\WEB-INF\classes exp5_servlet_call\FirstServlet.java exp5_servlet_call\SecondServlet.java
+
+Open:
+http://localhost:8080/exp5/index.html
+
+7) EXP 6 (STRUTS LOGIN)
+---------------------------------------------------------
+Create:
+apache-tomcat-9.0.111\webapps\exp6\
+apache-tomcat-9.0.111\webapps\exp6\WEB-INF\
+apache-tomcat-9.0.111\webapps\exp6\WEB-INF\classes\
+apache-tomcat-9.0.111\webapps\exp6\WEB-INF\lib\
+
+Copy files:
+- exp6_struts_login\login.jsp, success.jsp, error.jsp -> exp6\
+- exp6_struts_login\web.xml -> exp6\WEB-INF\
+- exp6_struts_login\struts.xml -> exp6\WEB-INF\classes\
+- all jars from C:\jars\struts\* -> exp6\WEB-INF\lib\
+
+javac -cp .;apache-tomcat-9.0.111\lib\servlet-api.jar;C:\jars\struts\* -d apache-tomcat-9.0.111\webapps\exp6\WEB-INF\classes exp6_struts_login\LoginAction.java
+
+Open:
+http://localhost:8080/exp6/login.jsp
+
+8) EXP 7 (STRUTS IMPLEMENTATION - ADD)
+---------------------------------------------------------
+Create exp7 webapp same as exp6.
+Copy:
+- exp7_struts_add\index.jsp, result.jsp -> exp7\
+- exp7_struts_add\web.xml -> exp7\WEB-INF\
+- exp7_struts_add\struts.xml -> exp7\WEB-INF\classes\
+- C:\jars\struts\* -> exp7\WEB-INF\lib\
+
+javac -cp .;apache-tomcat-9.0.111\lib\servlet-api.jar;C:\jars\struts\* -d apache-tomcat-9.0.111\webapps\exp7\WEB-INF\classes exp7_struts_add\AddAction.java
+
+Open:
+http://localhost:8080/exp7/index.jsp
+
+9) EXP 8 (HIBERNATE)
+---------------------------------------------------------
+cd exp8_hibernate
+javac -cp .;C:\jars\postgresql.jar;C:\jars\hib\* Student.java HibernateInsert.java
+java  -cp .;C:\jars\postgresql.jar;C:\jars\hib\* HibernateInsert
+
+10) EXP 9 (HIBERNATE FEEDBACK)
+---------------------------------------------------------
+cd exp9_hibernate_feedback
+javac -cp .;C:\jars\postgresql.jar;C:\jars\hib\* Feedback.java SaveFeedback.java
+java  -cp .;C:\jars\postgresql.jar;C:\jars\hib\* SaveFeedback
+
+11) EXP 10 (JDBC CRUD)
+---------------------------------------------------------
+cd exp10_crud
+javac -cp .;C:\jars\postgresql.jar JdbcCRUD.java
+java  -cp .;C:\jars\postgresql.jar JdbcCRUD
+
+12) EXPECTED SHORT OUTPUT TEXTS
+---------------------------------------------------------
+- Exp1: Connection Successful! ... Connection Closed.
+- Exp2: JSP Running, 10+20 = 30
+- Exp3: Record Inserted Successfully!
+- Exp4: Valid User (admin/1234) else Invalid User
+- Exp5: Second Servlet Executed: Called by FirstServlet
+- Exp6: Login Success. Welcome admin (or Login Failed...)
+- Exp7: Sum = (a+b)
+- Exp8: Data inserted by Hibernate.
+- Exp9: Feedback saved.
+- Exp10: INSERT / UPDATE / DELETE + student table rows
+
+=========================================================
+NOTES
+=========================================================
+- DB user/password in code is: postgres / postgres
+- Change password in files if your local password is different.
+- If your college strictly asks MySQL for exp9, only change driver/url/user/pass in `exp9_hibernate_feedback\hibernate.cfg.xml`.
