@@ -2,57 +2,50 @@
 #include <string.h>
 #include <ctype.h>
 
-typedef struct{ char k; int n; } Act;
-char tok[256][8]; int n;
+char t[256][8]; int n;
 
-void tokenize(const char *s){
+void tokenize(const char *s) {
     int i=0; n=0;
-    while(s[i]){
-        if(isspace((unsigned char)s[i])){ i++; continue; }
-        if(isalpha((unsigned char)s[i])||s[i]=='_'){ while(isalnum((unsigned char)s[i])||s[i]=='_') i++; strcpy(tok[n++],"id"); continue; }
-        if(strchr("+*()",s[i])){ tok[n][0]=s[i]; tok[n++][1]=0; i++; continue; }
-        i++;
+    while(s[i]) {
+        if(isspace(s[i])) i++;
+        else if(isalpha(s[i])||s[i]=='_') { while(isalnum(s[i])||s[i]=='_') i++; strcpy(t[n++], "id"); }
+        else if(strchr("+*()", s[i])) { t[n][0]=s[i++]; t[n++][1]=0; }
+        else i++;
     }
-    strcpy(tok[n++],"$");
+    strcpy(t[n++], "$");
 }
 
-Act act(int s,const char*t){
-    if(s==0&&(!strcmp(t,"id"))) return (Act){'s',5}; if(s==0&&(!strcmp(t,"("))) return (Act){'s',4};
-    if(s==1&&(!strcmp(t,"+"))) return (Act){'s',6};  if(s==1&&(!strcmp(t,"$"))) return (Act){'a',0};
-    if(s==2&&(!strcmp(t,"+"))) return (Act){'r',2};  if(s==2&&(!strcmp(t,"*"))) return (Act){'s',7}; if(s==2&&(!strcmp(t,")"))) return (Act){'r',2}; if(s==2&&(!strcmp(t,"$"))) return (Act){'r',2};
-    if(s==3&&(!strcmp(t,"+"))) return (Act){'r',4};  if(s==3&&(!strcmp(t,"*"))) return (Act){'r',4}; if(s==3&&(!strcmp(t,")"))) return (Act){'r',4}; if(s==3&&(!strcmp(t,"$"))) return (Act){'r',4};
-    if(s==4&&(!strcmp(t,"id"))) return (Act){'s',5}; if(s==4&&(!strcmp(t,"("))) return (Act){'s',4};
-    if(s==5&&(!strcmp(t,"+"))) return (Act){'r',6};  if(s==5&&(!strcmp(t,"*"))) return (Act){'r',6}; if(s==5&&(!strcmp(t,")"))) return (Act){'r',6}; if(s==5&&(!strcmp(t,"$"))) return (Act){'r',6};
-    if(s==6&&(!strcmp(t,"id"))) return (Act){'s',5}; if(s==6&&(!strcmp(t,"("))) return (Act){'s',4};
-    if(s==7&&(!strcmp(t,"id"))) return (Act){'s',5}; if(s==7&&(!strcmp(t,"("))) return (Act){'s',4};
-    if(s==8&&(!strcmp(t,"+"))) return (Act){'s',6};  if(s==8&&(!strcmp(t,")"))) return (Act){'s',11};
-    if(s==9&&(!strcmp(t,"+"))) return (Act){'r',1};  if(s==9&&(!strcmp(t,"*"))) return (Act){'s',7}; if(s==9&&(!strcmp(t,")"))) return (Act){'r',1}; if(s==9&&(!strcmp(t,"$"))) return (Act){'r',1};
-    if(s==10&&(!strcmp(t,"+"))) return (Act){'r',3}; if(s==10&&(!strcmp(t,"*"))) return (Act){'r',3}; if(s==10&&(!strcmp(t,")"))) return (Act){'r',3}; if(s==10&&(!strcmp(t,"$"))) return (Act){'r',3};
-    if(s==11&&(!strcmp(t,"+"))) return (Act){'r',5}; if(s==11&&(!strcmp(t,"*"))) return (Act){'r',5}; if(s==11&&(!strcmp(t,")"))) return (Act){'r',5}; if(s==11&&(!strcmp(t,"$"))) return (Act){'r',5};
-    return (Act){'e',0};
+int G(int s, char X) {
+    if(s==0||s==4) return X=='E'?(s?8:1):X=='T'?2:3;
+    if(s==6) return X=='T'?9:3;
+    return s==7?10:-1;
 }
 
-int gt(int s,char A){
-    if(s==0&&A=='E') return 1; if(s==0&&A=='T') return 2; if(s==0&&A=='F') return 3;
-    if(s==4&&A=='E') return 8; if(s==4&&A=='T') return 2; if(s==4&&A=='F') return 3;
-    if(s==6&&A=='T') return 9; if(s==6&&A=='F') return 3;
-    if(s==7&&A=='F') return 10;
-    return -1;
-}
+int main() {
+    char *in[]={"naruto + goku * luffy","supra * rx7","(ae86 + evo) * skyline"}, *lhs=" EETTFF";
+    int len[]={0,3,1,3,1,3,1};
+    for(int z=0; z<3; z++) {
+        tokenize(in[z]);
+        int st[256]={0}, tp=0, k=0;
+        printf("\nInput: %s\n", in[z]);
+        while(1) {
+            int s=st[tp], v=0; char *c=t[k], a='e';
+            if(s==0||s==4||s==6||s==7) {
+                if(*c=='i') a='s', v=5; else if(*c=='(') a='s', v=4;
+            }
+            if(s==1) { if(*c=='+') a='s', v=6; else if(*c=='$') a='a'; }
+            else if(s==2) { if(*c=='*') a='s', v=7; else if(strchr("+)$", *c)) a='r', v=2; }
+            else if(s==3) { if(strchr("+*)$", *c)) a='r', v=4; }
+            else if(s==5) { if(strchr("+*)$", *c)) a='r', v=6; }
+            else if(s==8) { if(*c=='+') a='s', v=6; else if(*c==')') a='s', v=11; }
+            else if(s==9) { if(*c=='*') a='s', v=7; else if(strchr("+)$", *c)) a='r', v=1; }
+            else if(s==10) { if(strchr("+*)$", *c)) a='r', v=3; }
+            else if(s==11) { if(strchr("+*)$", *c)) a='r', v=5; }
 
-int main(){
-    const char *lhs=" EETTFF"; int len[]={0,3,1,3,1,3,1};
-    char *in[]={"naruto + goku * luffy","supra * rx7","(ae86 + evo) * skyline"};
-    for(int z=0;z<3;z++){
-        int st[256],top=0,i=0; tokenize(in[z]); st[top]=0;
-        printf("\nInput: %s\n",in[z]);
-        while(1){
-            Act a=act(st[top],tok[i]);
-            if(a.k=='a'){ puts("Accept"); break; }
-            if(a.k=='e'){ printf("Error at %s\n",tok[i]); break; }
-            if(a.k=='s'){ st[++top]=a.n; i++; continue; }
-            top -= len[a.n]; int g=gt(st[top],lhs[a.n]); if(g<0){ puts("Goto error"); break; } st[++top]=g;
-            printf("reduce r%d\n",a.n);
+            if(a=='a') { puts("Accept"); break; }
+            if(a=='e') { printf("Error at %s\n", c); break; }
+            if(a=='s') { st[++tp]=v; k++; }
+            else { tp-=len[v]; st[++tp]=G(st[tp], lhs[v]); printf("reduce r%d\n", v); }
         }
     }
     return 0;
